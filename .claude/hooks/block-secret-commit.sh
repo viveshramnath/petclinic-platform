@@ -20,15 +20,17 @@ fi
 if echo "$COMMAND" | grep -qE 'git\s+(add|commit)'; then
 
   # BLOCK 1: Catch bulk adds that could sweep in secret files
-  # 'git add .', 'git add -A', 'git add --all' stage everything including secrets
-  if echo "$COMMAND" | grep -qE 'git\s+add\s+(-A|--all|\.)'; then
-    echo "BLOCKED: 'git add .' / 'git add -A' can accidentally stage secret files."
-    echo ""
-    echo "Instead, add files explicitly by name:"
-    echo "  git add terraform/modules/vpc/main.tf terraform/modules/vpc/variables.tf"
-    echo ""
-    echo "Or use 'git add -p' interactively in your terminal to review each change."
-    echo "This protects against accidentally committing .env, .tfvars, .pem, etc."
+  # 'git add .', 'git add -A', 'git add --all' stage everything including secrets.
+  # Each alternative is anchored to end-of-arg ($|\s) so it only matches the bare
+  # flag/dot itself, not a filename that happens to start with '.' (e.g. .mcp.json).
+  if echo "$COMMAND" | grep -qE 'git\s+add\s+(-A($|\s)|--all($|\s)|\.($|\s))'; then
+    echo "BLOCKED: 'git add .' / 'git add -A' can accidentally stage secret files." >&2
+    echo "" >&2
+    echo "Instead, add files explicitly by name:" >&2
+    echo "  git add terraform/modules/vpc/main.tf terraform/modules/vpc/variables.tf" >&2
+    echo "" >&2
+    echo "Or use 'git add -p' interactively in your terminal to review each change." >&2
+    echo "This protects against accidentally committing .env, .tfvars, .pem, etc." >&2
     exit 2
   fi
 
@@ -50,17 +52,17 @@ if echo "$COMMAND" | grep -qE 'git\s+(add|commit)'; then
 
   for pattern in "${SECRET_FILE_PATTERNS[@]}"; do
     if echo "$COMMAND" | grep -qiE "$pattern"; then
-      echo "BLOCKED: Detected potential secret file in git command."
-      echo ""
-      echo "The command appears to stage or commit a file matching: ${pattern}"
-      echo ""
-      echo "Files that may contain secrets should NEVER be committed to git."
-      echo "Instead:"
-      echo "  - Add the file to .gitignore"
-      echo "  - Store secrets in AWS Secrets Manager"
-      echo "  - Use terraform.tfvars.example with placeholder values"
-      echo ""
-      echo "If this is a false positive, run the git command directly in your terminal."
+      echo "BLOCKED: Detected potential secret file in git command." >&2
+      echo "" >&2
+      echo "The command appears to stage or commit a file matching: ${pattern}" >&2
+      echo "" >&2
+      echo "Files that may contain secrets should NEVER be committed to git." >&2
+      echo "Instead:" >&2
+      echo "  - Add the file to .gitignore" >&2
+      echo "  - Store secrets in AWS Secrets Manager" >&2
+      echo "  - Use terraform.tfvars.example with placeholder values" >&2
+      echo "" >&2
+      echo "If this is a false positive, run the git command directly in your terminal." >&2
       exit 2
     fi
   done
