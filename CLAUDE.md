@@ -131,7 +131,7 @@ Five MCP servers configured at the project level:
 
 | Server | Purpose |
 |--------|---------|
-| `awslabs.terraform-mcp-server` | AWS/AWSCC provider docs, Checkov scanning, terraform/terragrunt execution |
+| `terraform-mcp-server` | Terraform Registry provider/module docs, HCP Terraform workspace ops (official HashiCorp server; no Checkov — run `checkov` via CLI for scanning) |
 | `aws-knowledge-mcp` | AWS documentation search, regional availability, documentation reader |
 | `awslabs.aws-pricing-mcp-server` | Cost estimation for AWS services (RDS, EKS, EC2, ALB) |
 | `context7` | Up-to-date library documentation (Terraform, Kubernetes, Helm) |
